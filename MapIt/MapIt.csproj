@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Kirk Woll</Authors>
+    <Company />
+    <Description>Library to make mapping entity framework core entities more composable</Description>
+    <Copyright>2019</Copyright>
+    <PackageProjectUrl>https://github.com/kswoll/mapit</PackageProjectUrl>
+    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+  </PropertyGroup>
+
+</Project>
