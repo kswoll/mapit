@@ -26,7 +26,7 @@ namespace MapIt.Tests
 
             var dbTarget = new DbTarget
             {
-//                TypeA = new DbTargetTypeA()
+                TypeA = new DbTargetTypeA()
             };
             var dbContainer = new DbContainer
             {
@@ -53,11 +53,11 @@ namespace MapIt.Tests
             Id = typeA.Id
         };
 
-        public static Expression<Func<DbTarget, Target>> MapTarget { get; } = Compose((DbTarget target) => (Target)target.Include(x => x.TypeA, MapTargetTypeA));
+        public static Expression<Func<DbTarget, Target>> MapTarget { get; } = Compose((DbTarget target) => (Target)Include(target.TypeA, MapTargetTypeA));
 
         public static Expression<Func<DbContainerTarget, ContainerTarget>> MapContainerTarget { get; } = Compose((DbContainerTarget containerTarget) => new ContainerTarget
         {
-            Target = containerTarget.Include(x => x.Target, MapTarget)
+            Target = Include(containerTarget.Target, MapTarget)
         });
     }
 
