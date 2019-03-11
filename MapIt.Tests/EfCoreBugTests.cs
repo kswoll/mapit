@@ -14,7 +14,41 @@ namespace MapIt.Tests
     public class EfCoreBugTests
     {
         [Test]
-        public async Task EfCoreBug14987()
+        public async Task EfCoreBug14987NullTarget()
+        {
+            var dbConnection = new SqliteConnection("DataSource=:memory:");
+            dbConnection.Open();
+            var dbOptions = new DbContextOptionsBuilder<TestDb>()
+                .UseSqlite(dbConnection)
+                .Options;
+            var db = new TestDb(dbOptions);
+            db.Database.EnsureCreated();
+
+            var dbTarget = new DbTarget
+            {
+            };
+            var dbContainer = new DbContainer
+            {
+                Targets = new List<DbContainerTarget>()
+            };
+            dbContainer.Targets.Add(new DbContainerTarget
+            {
+                Target = dbTarget
+            });
+            db.Containers.Add(dbContainer);
+            await db.SaveChangesAsync();
+
+            var container = await db.Containers
+                .Select(x => new Container
+                {
+                    Targets = x.Targets.AsQueryable().Select(MapContainerTarget).ToList()
+                })
+                .SingleAsync();
+
+        }
+
+        [Test]
+        public async Task EfCoreBug14987NonNullTarget()
         {
             var dbConnection = new SqliteConnection("DataSource=:memory:");
             dbConnection.Open();
