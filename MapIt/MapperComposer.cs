@@ -31,16 +31,27 @@ namespace MapIt
             // included mapper with the expression passed as the first argument.
             if (node.Method.IsGenericMethod && node.Method.GetGenericMethodDefinition() == includeMethod)
             {
+                var parent = node.Arguments[0];
+
+                var entityPropertyUnary = (UnaryExpression)node.Arguments[1];
+                var entityProperty = (LambdaExpression)entityPropertyUnary.Operand;
+                var entity = LambdaBinder.BindBody(entityProperty, parent);
+//                var entityPropertyBody = entityProperty.Body;
+
                 // The reference to the entity the included mapper applies to (passed to the Include method)
-                var entity = node.Arguments[0];
+//                var entity = entityProperty;//node.Arguments[0];
 
                 // The mapper to be used to map the entity
-                var includeMapper = (LambdaExpression)node.Arguments[1].Evaluate();
+                var includeMapper = (LambdaExpression)node.Arguments[2].Evaluate();
 
                 // Substitutes references to the entity parameter of the referenced mapper with
                 // the entity supplied to the Include method
                 var body = LambdaBinder.BindBody(includeMapper, entity);
-                body = Expression.Condition(Expression.NotEqual(entity, Expression.Constant(null)), body, Expression.Constant(null, body.Type), body.Type);
+//                if (((MemberExpression)entityProperty.Body).Expression != entityProperty.Parameters[0])
+                    body = Expression.Condition(Expression.NotEqual(entity, Expression.Constant(null)), body, Expression.Constant(null, body.Type), body.Type);
+//                else
+//                    Console.WriteLine("Same");
+//                body = Expression.Condition(Expression.NotEqual(entity, Expression.Constant(null)), body, Expression.Constant(null, body.Type), body.Type);
                 return body;
             }
             return base.VisitMethodCall(node);

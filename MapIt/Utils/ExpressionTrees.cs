@@ -20,7 +20,7 @@ namespace MapIt.Utils
         /// <summary>
         /// Marker function used by the Compose method to combine one-to-one mappings between entities.
         /// </summary>
-        public static TModelEntity Include<TDbEntity, TModelEntity>(TDbEntity dbEntity, Expression<Func<TDbEntity, TModelEntity>> mapper)
+        public static TModelEntity Include<TDbParent, TDbEntity, TModelEntity>(this TDbParent parent, Expression<Func<TDbParent, TDbEntity>> dbEntity, Expression<Func<TDbEntity, TModelEntity>> mapper)
         {
             return default;
         }
