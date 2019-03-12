@@ -39,13 +39,18 @@ namespace MapIt
                 Expression checkForNullAgainst = entity;
                 if (entity is MemberExpression entityMember)
                 {
-                    var entityType = entityMember.Expression.Type;
+//                    var entityType = entityMember.Expression.Type;
                     var (idProperty, isNullable) = nullableIdPropertiesByEntityProperty.GetOrAdd(entityMember.Member, x =>
                     {
                         var property = x.DeclaringType.GetProperty(x.Name + "Id");
                         var propertyIsNullable = Nullable.GetUnderlyingType(property.PropertyType) != null;
                         return (property, propertyIsNullable);
                     });
+
+                    // Work around EF core bug:
+                    // https://github.com/aspnet/EntityFrameworkCore/issues/14987
+                    // It doesn't like comparing the relationship to null but is happy comparing the corresponding
+                    // FooId property.
                     if (idProperty != null && isNullable)
                     {
                         checkForNullAgainst = Expression.Property(entityMember.Expression, idProperty);
