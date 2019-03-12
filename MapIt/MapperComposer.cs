@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Reflection;
 using MapIt.Utils;
@@ -8,6 +9,7 @@ namespace MapIt
     public class MapperComposer : ExpressionVisitor
     {
         private static readonly MethodInfo includeMethod = typeof(ExpressionTrees).GetMethod(nameof(ExpressionTrees.Include));
+        private static readonly ConcurrentDictionary<MemberInfo, (PropertyInfo, bool)> nullableIdPropertiesByEntityProperty = new ConcurrentDictionary<MemberInfo, (PropertyInfo, bool)>();
 
         /// <summary>
         /// Takes an expression tree and injects other mappers when usages of ExpressionTrees.Include
@@ -38,8 +40,13 @@ namespace MapIt
                 if (entity is MemberExpression entityMember)
                 {
                     var entityType = entityMember.Expression.Type;
-                    var idProperty = entityType.GetProperty(entityMember.Member.Name + "Id");
-                    if (idProperty != null && Nullable.GetUnderlyingType(idProperty.PropertyType) != null)
+                    var (idProperty, isNullable) = nullableIdPropertiesByEntityProperty.GetOrAdd(entityMember.Member, x =>
+                    {
+                        var property = x.DeclaringType.GetProperty(x.Name + "Id");
+                        var propertyIsNullable = Nullable.GetUnderlyingType(property.PropertyType) != null;
+                        return (property, propertyIsNullable);
+                    });
+                    if (idProperty != null && isNullable)
                     {
                         checkForNullAgainst = Expression.Property(entityMember.Expression, idProperty);
                     }
