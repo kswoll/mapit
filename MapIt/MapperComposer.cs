@@ -43,8 +43,15 @@ namespace MapIt
                     var (idProperty, isNullable) = nullableIdPropertiesByEntityProperty.GetOrAdd(entityMember.Member, x =>
                     {
                         var property = x.DeclaringType.GetProperty(x.Name + "Id");
-                        var propertyIsNullable = Nullable.GetUnderlyingType(property.PropertyType) != null;
-                        return (property, propertyIsNullable);
+                        if (property != null)
+                        {
+                            var propertyIsNullable = Nullable.GetUnderlyingType(property.PropertyType) != null;
+                            return (property, propertyIsNullable);
+                        }
+                        else
+                        {
+                            return ((PropertyInfo)null, false);
+                        }
                     });
 
                     // Work around EF core bug:

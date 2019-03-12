@@ -10,7 +10,7 @@
     <Copyright>2019</Copyright>
     <PackageProjectUrl>https://github.com/kswoll/mapit</PackageProjectUrl>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
   </PropertyGroup>
 
 </Project>
