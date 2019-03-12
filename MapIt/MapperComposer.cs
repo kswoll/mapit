@@ -36,7 +36,7 @@ namespace MapIt
                 // The reference to the entity the included mapper applies to (passed to the Include method)
                 var entity = node.Arguments[0];
 
-                Expression checkForNullAgainst = entity;
+                Expression checkForNullAgainst = null;// entity;  EFCore has a lot of bugs when comparing relationships against null (vs. using an Id property) -- just don't bother for now if we can't find the id property
                 if (entity is MemberExpression entityMember)
                 {
 //                    var entityType = entityMember.Expression.Type;
@@ -70,8 +70,11 @@ namespace MapIt
                 // Substitutes references to the entity parameter of the referenced mapper with
                 // the entity supplied to the Include method
                 var body = LambdaBinder.BindBody(includeMapper, entity);
-                var nullExpression = Expression.Constant(null, checkForNullAgainst.Type);
-                body = Expression.Condition(Expression.NotEqual(checkForNullAgainst, nullExpression), body, Expression.Constant(null, body.Type), body.Type);
+                if (checkForNullAgainst != null)
+                {
+                    var nullExpression = Expression.Constant(null, checkForNullAgainst.Type);
+                    body = Expression.Condition(Expression.NotEqual(checkForNullAgainst, nullExpression), body, Expression.Constant(null, body.Type), body.Type);
+                }
                 return body;
             }
             return base.VisitMethodCall(node);
