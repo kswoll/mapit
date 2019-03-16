@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Text;
 
 namespace MapIt.Utils
 {
@@ -46,17 +45,29 @@ namespace MapIt.Utils
         /// to re-use mappers when the reference to another entity is one-to-one (whereas for
         /// collection types, you can just use the Select operator out of the box).
         /// </summary>
-        public static Expression<Func<TDbEntity, TModelEntity>> Compose<TDbEntity, TModelEntity>(Expression<Func<TDbEntity, TModelEntity>> mapper)
+        public static EntityMapper<TDbEntity, TModelEntity> Compose<TDbEntity, TModelEntity>(Expression<Func<TDbEntity, TModelEntity>> mapper)
         {
-            return MapperComposer.Compose(mapper);
+            return new EntityMapper<TDbEntity, TModelEntity>(MapperComposer.Compose(mapper), mapper.Compile());
         }
 
         /// <summary>
         /// Marker function used by the Compose method to combine one-to-one mappings between entities.
         /// </summary>
         public static TModelEntity Include<TDbEntity, TModelEntity>(TDbEntity dbEntity, Expression<Func<TDbEntity, TModelEntity>> mapper)
+            where TDbEntity : class
+            where TModelEntity : class
         {
-            return mapper.Compile()(dbEntity);
+            return dbEntity == null ? null : mapper.Compile()(dbEntity);
+        }
+
+        /// <summary>
+        /// Marker function used by the Compose method to combine one-to-one mappings between entities.
+        /// </summary>
+        public static TModelEntity Include<TDbEntity, TModelEntity>(TDbEntity dbEntity, EntityMapper<TDbEntity, TModelEntity> mapper)
+            where TDbEntity : class
+            where TModelEntity : class
+        {
+            return dbEntity == null ? null : mapper.Function(dbEntity);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using MapIt.Utils;
@@ -8,7 +9,8 @@ namespace MapIt
 {
     public class MapperComposer : ExpressionVisitor
     {
-        private static readonly MethodInfo includeMethod = typeof(ExpressionTrees).GetMethod(nameof(ExpressionTrees.Include));
+        private static readonly MethodInfo includeMethodExpression = typeof(ExpressionTrees).GetMethods().Single(x => x.Name == nameof(ExpressionTrees.Include) && x.GetParameters()[1].ParameterType.GetGenericTypeDefinition() == typeof(Expression<>));
+        private static readonly MethodInfo includeMethodMapper = typeof(ExpressionTrees).GetMethods().Single(x => x.Name == nameof(ExpressionTrees.Include) && x.GetParameters()[1].ParameterType.GetGenericTypeDefinition() == typeof(EntityMapper<,>));
         private static readonly ConcurrentDictionary<MemberInfo, (PropertyInfo, bool)> nullableIdPropertiesByEntityProperty = new ConcurrentDictionary<MemberInfo, (PropertyInfo, bool)>();
 
         /// <summary>
@@ -31,7 +33,9 @@ namespace MapIt
             // Whenever we find a call to ExpressionTrees.Include, replace it with the body
             // of the referenced mapper, replacing references to the entity parameter of the
             // included mapper with the expression passed as the first argument.
-            if (node.Method.IsGenericMethod && node.Method.GetGenericMethodDefinition() == includeMethod)
+            var isIncludeMethod = node.Method.GetGenericMethodDefinition() == includeMethodExpression;
+            var isIncludeMapper = node.Method.GetGenericMethodDefinition() == includeMethodMapper;
+            if (node.Method.IsGenericMethod && (isIncludeMethod || isIncludeMapper))
             {
                 // The reference to the entity the included mapper applies to (passed to the Include method)
                 var entity = node.Arguments[0];
@@ -65,7 +69,7 @@ namespace MapIt
                 }
 
                 // The mapper to be used to map the entity
-                var includeMapper = (LambdaExpression)node.Arguments[1].Evaluate();
+                var includeMapper = isIncludeMethod ? (LambdaExpression)node.Arguments[1].Evaluate() : ((IEntityMapper)node.Arguments[1].Evaluate()).Expression;
 
                 // Substitutes references to the entity parameter of the referenced mapper with
                 // the entity supplied to the Include method
