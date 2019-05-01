@@ -51,7 +51,9 @@ namespace MapIt.Utils
         }
 
         /// <summary>
-        /// Marker function used by the Compose method to combine one-to-one mappings between entities.
+        /// Marker function used by the Compose method to combine one-to-one mappings between entities.  If you find that this code is being
+        /// executed in a context in which you'd expect this to have been pure expression trees (i.e. not actually executing this function)
+        /// then you probably forgot to wrap the mapper in Compose(...).
         /// </summary>
         public static TModelEntity Include<TDbEntity, TModelEntity>(TDbEntity dbEntity, Expression<Func<TDbEntity, TModelEntity>> mapper)
             where TDbEntity : class
@@ -61,7 +63,9 @@ namespace MapIt.Utils
         }
 
         /// <summary>
-        /// Marker function used by the Compose method to combine one-to-one mappings between entities.
+        /// Marker function used by the Compose method to combine one-to-one mappings between entities.  If you find that this code is being
+        /// executed in a context in which you'd expect this to have been pure expression trees (i.e. not actually executing this function)
+        /// then you probably forgot to wrap the mapper in Compose(...).
         /// </summary>
         public static TModelEntity Include<TDbEntity, TModelEntity>(TDbEntity dbEntity, EntityMapper<TDbEntity, TModelEntity> mapper)
             where TDbEntity : class
